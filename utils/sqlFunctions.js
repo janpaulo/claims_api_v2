@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const config = require("../db/config");
 const pool = mysql.createPool(config);
 
+// Create a new table
 const createTable = (schema) => {
   return new Promise((resolve, reject) => {
     pool.query(schema, (err, results) => {
@@ -14,6 +15,7 @@ const createTable = (schema) => {
   });
 };
 
+// Check if a record exists in a table
 const checkRecordExists = (tableName, column, value) => {
   return new Promise((resolve, reject) => {
     const query = `SELECT * FROM ${tableName} WHERE ${column} = ?`;
@@ -42,6 +44,22 @@ const getAllRecord = (tableName, column, value) => {
   });
 };
 
+// Retrieve a single record by column value
+const getRecordById = (tableName, column, value) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT * FROM ${tableName} WHERE ${column} = ?`;
+
+    pool.query(query, [value], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results.length ? results[0] : null);
+      }
+    });
+  });
+};
+
+// Insert a new record into a table
 const insertRecord = (tableName, record) => {
   return new Promise((resolve, reject) => {
     const query = `INSERT INTO ${tableName} SET ?`;
@@ -56,6 +74,7 @@ const insertRecord = (tableName, record) => {
   });
 };
 
+// Update a record in a table
 const updateRecord = (tableName, updates, column, value) => {
   return new Promise((resolve, reject) => {
     const columnValues = Object.keys(updates)
@@ -63,7 +82,22 @@ const updateRecord = (tableName, updates, column, value) => {
       .join(", ");
     const query = `UPDATE ${tableName} SET ${columnValues} WHERE ${column} = ?`;
 
-    pool.query(query, Object.values(updates).concat(value), (err, results) => {
+    pool.query(query, [...Object.values(updates), value], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+// Delete a record from a table
+const deleteRecord = (tableName, column, value) => {
+  return new Promise((resolve, reject) => {
+    const query = `DELETE FROM ${tableName} WHERE ${column} = ?`;
+
+    pool.query(query, [value], (err, results) => {
       if (err) {
         reject(err);
       } else {
@@ -77,6 +111,8 @@ module.exports = {
   createTable,
   checkRecordExists,
   getAllRecord,
+  getRecordById,
   insertRecord,
   updateRecord,
+  deleteRecord,
 };
