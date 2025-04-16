@@ -8,14 +8,14 @@ const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const claimsRoutes = require("./routes/claimsRoutes");
 const esoaRoutes = require("./routes/esoaRoutes");
-const hopitalsRoutes = require("./routes/hospitalsRoutes");
+const hospitalsRoutes = require("./routes/hospitalsRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/", authRoutes, profileRoutes,claimsRoutes,esoaRoutes,hopitalsRoutes);
+app.use("/", authRoutes, profileRoutes,claimsRoutes,esoaRoutes,hospitalsRoutes);
 
 connectDB();
 
