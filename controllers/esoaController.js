@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { insertRecord, getAllRecord } = require("../utils/sqlFunctions");
+const { insertRecord, getAllRecord,getEsoasStats } = require("../utils/sqlFunctions");
 
 // Create ESOA
 const createESOA = async (req, res) => {
@@ -39,6 +39,20 @@ const createESOA = async (req, res) => {
   }
 };
 
+
+
+const getEsoaStats = async (req, res) => {
+  try {
+    const data = await getEsoasStats();
+    res.status(200).json({
+      message: "ESOA stats retrieved successfully!",
+      data
+    });
+  } catch (error) {
+    console.error("Error retrieving ESOA stats:", error);
+    res.status(500).json({ error: "Failed to retrieve ESOA stats." });
+  }
+};
 // Get ESOA
 const getESOA = async (req, res) => {
   try {
@@ -54,5 +68,6 @@ const getESOA = async (req, res) => {
 
 module.exports = {
   createESOA,
-  getESOA
+  getESOA,
+  getEsoaStats
 };

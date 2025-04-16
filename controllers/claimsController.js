@@ -1,5 +1,5 @@
 
-const { insertRecord, getAllRecord, updateRecord, checkRecordExists } = require("../utils/sqlFunctions");
+const { insertRecord, getAllRecord, updateRecord, checkRecordExists,getClaimStats,getEsoasStats } = require("../utils/sqlFunctions");
 
 const createClaim = async (req, res) => {
   const { series_no, member_pin, date_admited, status, hci_no, date_created, xml_data } = req.body;
@@ -28,6 +28,20 @@ const getClaims = async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve claims. Please try again later." });
   }
 };
+const getClaimsStats = async (req, res) => {
+  try {
+    const data = await getClaimStats();
+    res.status(200).json({
+      message: "Claim statistics retrieved successfully!",
+      data
+    });
+  } catch (error) {
+    console.error("Error retrieving claim stats:", error); // <== KEEP THIS
+    res.status(500).json({ error: "Failed to retrieve claim stats." });
+  }
+};
+
+
 
 const updateClaim = async (req, res) => {
   const { id } = req.params;
@@ -47,4 +61,4 @@ const updateClaim = async (req, res) => {
   }
 };
 
-module.exports = { createClaim, getClaims, updateClaim };
+module.exports = { createClaim, getClaims, updateClaim ,getClaimsStats};
