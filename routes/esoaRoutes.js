@@ -1,8 +1,10 @@
 const express = require("express");
-const { createESOA,getESOA } = require("../controllers/esoaController");
-const router = express.Router();
+const { createESOA,getESOA,getEsoaStats } = require("../controllers/esoaController");
+const { requiresAuth } = require("../middlewares/authMiddleware");
 
-router.post("/createEsoa", createESOA);
-router.get("/esoas", getESOA);
+const router = express.Router();
+router.post("/createEsoa", requiresAuth, createESOA);
+router.get("/esoas", requiresAuth, getESOA);
+router.get("/esoas/all", requiresAuth, getEsoaStats);
 
 module.exports = router;
