@@ -173,6 +173,95 @@ const deleteRecord = (tableName, column, value) => {
   });
 };
 
+const getRolesWithPermissions = () => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        r.id as role_id,
+        r.name as role_name,
+        r.description as role_description,
+        r.is_active,
+        p.id as permission_id,
+        p.name as permission_name,
+        p.description as permission_description
+      FROM roles r
+      LEFT JOIN role_permissions rp ON r.id = rp.role_id
+      LEFT JOIN permissions p ON rp.permission_id = p.id
+    `;
+
+    pool.query(query, (err, results) => {
+      if (err) return reject(err);
+
+      const roles = {};
+
+      results.forEach(row => {
+        if (!roles[row.role_id]) {
+          roles[row.role_id] = {
+            id: row.role_id,
+            name: row.role_name,
+            description: row.role_description,
+            is_active: row.is_active,
+            permissions: [],
+          };
+        }
+
+        if (row.permission_id) {
+          roles[row.role_id].permissions.push({
+            id: row.permission_id,
+            name: row.permission_name,
+            description: row.permission_description,
+            module_name: row.module_name,
+          });
+        }
+      });
+
+      resolve(Object.values(roles));
+    });
+  });
+};
+
+
+const assignPermissionsToRole = (roleId, permissionIds) => {
+  return new Promise((resolve, reject) => {
+    if (!roleId || !Array.isArray(permissionIds)) {
+      return reject(new Error("Role ID and permission IDs are required."));
+    }
+
+    // Clear existing permissions first
+    pool.query("DELETE FROM role_permissions WHERE role_id = ?", [roleId], (err) => {
+      if (err) return reject(err);
+
+      if (!permissionIds.length) return resolve("Cleared");
+
+      const values = permissionIds.map(pid => [roleId, pid]);
+      const insertQuery = "INSERT INTO role_permissions (role_id, permission_id) VALUES ?";
+      pool.query(insertQuery, [values], (err2, result) => {
+        if (err2) return reject(err2);
+        resolve(result);
+      });
+    });
+  });
+};
+
+const assignManyToMany = (tableName, column1, column2, primaryId, relatedIds) => {
+  return new Promise((resolve, reject) => {
+    if (!tableName || !column1 || !column2 || !primaryId || !Array.isArray(relatedIds)) {
+      return reject(new Error("All parameters are required and relatedIds must be an array."));
+    }
+
+    const values = relatedIds.map((rid) => [primaryId, rid]);
+    const query = `INSERT INTO \`${tableName}\` (\`${column1}\`, \`${column2}\`) VALUES ?`;
+
+    pool.query(query, [values], (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(result);
+    });
+  });
+};
+
+
 module.exports = {
   createTable,
   checkRecordExists,
@@ -182,5 +271,8 @@ module.exports = {
   updateRecord,
   deleteRecord,
   getClaimStats,
-  getEsoasStats
+  getEsoasStats,
+  getRolesWithPermissions,
+  assignManyToMany,
+  assignPermissionsToRole
 };

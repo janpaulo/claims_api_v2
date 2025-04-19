@@ -9,13 +9,15 @@ const profileRoutes = require("./routes/profileRoutes");
 const claimsRoutes = require("./routes/claimsRoutes");
 const esoaRoutes = require("./routes/esoaRoutes");
 const hospitalsRoutes = require("./routes/hospitalsRoutes");
+const rolesRoutes = require("./routes/rolesRoutes");
+const permissionRoutes = require("./routes/permissionRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/", authRoutes, profileRoutes,claimsRoutes,esoaRoutes,hospitalsRoutes);
+app.use("/", authRoutes, profileRoutes,claimsRoutes,esoaRoutes,hospitalsRoutes,rolesRoutes,permissionRoutes);
 
 connectDB();
 
