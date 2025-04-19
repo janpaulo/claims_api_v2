@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { insertRecord, getAllRecord,getEsoasStats } = require("../utils/sqlFunctions");
+const { insertRecord, getAllRecord,getEsoasStats,checkRecordExists } = require("../utils/sqlFunctions");
 
 // Create ESOA
 const createESOA = async (req, res) => {
@@ -66,8 +66,28 @@ const getESOA = async (req, res) => {
   }
 };
 
+const getEsoaPerHci = async (req, res) => {
+  const { hci_no } = req.params;
+
+  try {
+    const esoa = await checkRecordExists("esoa", "hci_no", hci_no);
+    if (!esoa) {
+      return res.status(404).json({ error: "Esoa not found" });
+    }
+    res.status(200).json({
+      message: "Esoa statistics retrieved successfully!",
+      esoa: [esoa]
+    });
+  } catch (error) {
+    console.error("Error updating Esoa:", error);
+    res.status(500).json({ error: "Failed to  Esoa. Please try again later." });
+  }
+};
+
+
 module.exports = {
   createESOA,
   getESOA,
-  getEsoaStats
+  getEsoaStats,
+  getEsoaPerHci
 };
