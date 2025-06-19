@@ -18,9 +18,24 @@ const createTable = (schema) => {
 // Check if a record exists in a table
 const checkRecordExists = (tableName, column, value) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM ${tableName} WHERE ${column} = ?`;
+    let query;
+    let params = [value];
 
-    pool.query(query, [value], (err, results) => {
+    if (tableName === "users") {
+      query = `
+        SELECT 
+          u.*, 
+          h.hos_id, h.hospital_name, h.accreditation_num, 
+          h.cypher_key, h.is_active, h.created_by, h.username_code
+        FROM users u
+        LEFT JOIN hospital_accounts h ON u.hci_no = h.accreditation_num
+        WHERE u.${column} = ?
+      `;
+    } else {
+      query = `SELECT * FROM ${tableName} WHERE ${column} = ?`;
+    }
+
+    pool.query(query, params, (err, results) => {
       if (err) {
         reject(err);
       } else {
@@ -29,6 +44,9 @@ const checkRecordExists = (tableName, column, value) => {
     });
   });
 };
+
+
+
 
 const getAllRecord = (tableName, column, value) => {
   return new Promise((resolve, reject) => {

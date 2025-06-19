@@ -56,38 +56,36 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    res
-      .status(400)
-      .json({ error: "Email or Password fields cannot be empty!" });
-    return;
+    return res.status(400).json({ error: "Email or Password fields cannot be empty!" });
   }
 
   try {
     const existingUser = await checkRecordExists("users", "email", email);
 
-    if (existingUser) {
-      if (!existingUser.password) {
-        res.status(401).json({ error: "Invalid credentials" });
-        return;
-      }
+    if (!existingUser || !existingUser.password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
-      const passwordMatch = await bcrypt.compare(
-        password,
-        existingUser.password
-      );
+    const passwordMatch = await bcrypt.compare(password, existingUser.password);
 
-      if (passwordMatch) {
-        res.status(200).json({
-          userId: existingUser.userId,
-          email: existingUser.email,
-          hci_no: existingUser.hci_no,
-          access_token: generateAccessToken(existingUser.userId),
-        });
-      } else {
-        res.status(401).json({ error: "Invalid credentials" });
-      }
+    if (passwordMatch) {
+      return res.status(200).json({
+        userId: existingUser.userId,
+        email: existingUser.email,
+        hci_no: existingUser.hci_no,
+        access_token: generateAccessToken(existingUser.userId),
+        hospital: {
+          hos_id: existingUser.hos_id,
+          hospital_name: existingUser.hospital_name,
+          accreditation_num: existingUser.accreditation_num,
+          cypher_key: existingUser.cypher_key,
+          is_active: existingUser.is_active,
+          created_by: existingUser.created_by,
+          username_code: existingUser.username_code,
+        },
+      });
     } else {
-      res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
