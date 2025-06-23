@@ -11,6 +11,7 @@ const esoaRoutes = require("./routes/esoaRoutes");
 const hospitalsRoutes = require("./routes/hospitalsRoutes");
 const rolesRoutes = require("./routes/rolesRoutes");
 const permissionRoutes = require("./routes/permissionRoutes");
+const attachedFilesRoutes = require("./routes/attachedFilesRoutes");
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", authRoutes, profileRoutes,claimsRoutes,esoaRoutes,hospitalsRoutes,rolesRoutes,permissionRoutes);
+app.use("/attached-files", attachedFilesRoutes);
 
 connectDB();
 
