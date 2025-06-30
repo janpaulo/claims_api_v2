@@ -71,12 +71,14 @@ const getEsoaPerHci = async (req, res) => {
 
   try {
     const esoa = await checkRecordExists("esoa", "hci_no", hci_no);
-    if (!esoa) {
-      return res.status(404).json({ error: "Esoa not found" });
-    }
+    // if (!esoa) {
+    //   return res.status(404).json({ error: "Esoa not found" });
+    // }
+
+    
     res.status(200).json({
       message: "Esoa statistics retrieved successfully!",
-      esoa: [esoa]
+      esoa:!esoa ? [] :[esoa]
     });
   } catch (error) {
     console.error("Error updating Esoa:", error);

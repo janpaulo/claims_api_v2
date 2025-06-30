@@ -47,12 +47,12 @@ const getClaimPerHci = async (req, res) => {
 
   try {
     const claims = await checkRecordExists("claims", "hci_no", hci_no);
-    if (!claims) {
-      return res.status(404).json({ error: "Claim not found" });
-    }
+    // if (!claims) {
+    //   return res.status(404).json({ error: "Claim not found" });
+    // }
     res.status(200).json({
       message: "Claim statistics retrieved successfully!",
-      claims: [claims]
+      claims: !claims ? [] :[claims]
     });
   } catch (error) {
     console.error("Error updating claim:", error);
