@@ -16,37 +16,38 @@ const createTable = (schema) => {
 };
 
 // Check if a record exists in a table
-const checkRecordExists = (tableName, column, value) => {
+const checkRecordExists = (tableName, column, value, multiple = false) => {
   return new Promise((resolve, reject) => {
     let query;
     let params = [value];
-
     if (tableName === "users") {
       query = `
         SELECT 
-          u.*, 
-          h.hos_id, h.hospital_name, h.accreditation_num, 
-          h.cypher_key, h.is_active, h.created_by, h.username_code
+          u.*, r.*,
+          h.*
         FROM users u
         LEFT JOIN hospital_accounts h ON u.hci_no = h.accreditation_num
+        LEFT JOIN roles r ON u.role_id = r.id
         WHERE u.${column} = ?
       `;
     } else {
       query = `SELECT * FROM ${tableName} WHERE ${column} = ?`;
     }
 
+    console.log(params);
     pool.query(query, params, (err, results) => {
       if (err) {
         reject(err);
       } else {
-        resolve(results.length ? results[0] : null);
+        if (multiple) {
+          resolve(results); // Return all rows
+        } else {
+          resolve(results.length ? results[0] : null); // Return one or null
+        }
       }
     });
   });
 };
-
-
-
 
 const getAllRecord = (tableName, column, value) => {
   return new Promise((resolve, reject) => {
@@ -61,6 +62,28 @@ const getAllRecord = (tableName, column, value) => {
     });
   });
 };
+
+const getTodaysClaimsCount = (hci_no) => {
+  return new Promise((resolve, reject) => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+
+    const query = `
+      SELECT COUNT(*) AS count 
+      FROM claims 
+      WHERE DATE(date_created) = ? AND hci_no = ?
+    `;
+
+    pool.query(query, [dateStr, hci_no], (err, results) => {
+      if (err) reject(err);
+      else resolve(results[0].count);
+    });
+  });
+};
+
 
 const getClaimStats = () => {
   return new Promise((resolve, reject) => {
@@ -94,7 +117,7 @@ const getClaimStats = () => {
 
         resolve({
           total: totalResult[0],
-          per_hci: groupResult
+          per_hci: groupResult,
         });
       });
     });
@@ -126,7 +149,6 @@ const getEsoasStats = () => {
     });
   });
 };
-
 
 // Retrieve a single record by column value
 const getRecordById = (tableName, column, value) => {
@@ -212,7 +234,7 @@ const getRolesWithPermissions = () => {
 
       const roles = {};
 
-      results.forEach(row => {
+      results.forEach((row) => {
         if (!roles[row.role_id]) {
           roles[row.role_id] = {
             id: row.role_id,
@@ -238,7 +260,6 @@ const getRolesWithPermissions = () => {
   });
 };
 
-
 const assignPermissionsToRole = (roleId, permissionIds) => {
   return new Promise((resolve, reject) => {
     if (!roleId || !Array.isArray(permissionIds)) {
@@ -246,25 +267,46 @@ const assignPermissionsToRole = (roleId, permissionIds) => {
     }
 
     // Clear existing permissions first
-    pool.query("DELETE FROM role_permissions WHERE role_id = ?", [roleId], (err) => {
-      if (err) return reject(err);
+    pool.query(
+      "DELETE FROM role_permissions WHERE role_id = ?",
+      [roleId],
+      (err) => {
+        if (err) return reject(err);
 
-      if (!permissionIds.length) return resolve("Cleared");
+        if (!permissionIds.length) return resolve("Cleared");
 
-      const values = permissionIds.map(pid => [roleId, pid]);
-      const insertQuery = "INSERT INTO role_permissions (role_id, permission_id) VALUES ?";
-      pool.query(insertQuery, [values], (err2, result) => {
-        if (err2) return reject(err2);
-        resolve(result);
-      });
-    });
+        const values = permissionIds.map((pid) => [roleId, pid]);
+        const insertQuery =
+          "INSERT INTO role_permissions (role_id, permission_id) VALUES ?";
+        pool.query(insertQuery, [values], (err2, result) => {
+          if (err2) return reject(err2);
+          resolve(result);
+        });
+      }
+    );
   });
 };
 
-const assignManyToMany = (tableName, column1, column2, primaryId, relatedIds) => {
+const assignManyToMany = (
+  tableName,
+  column1,
+  column2,
+  primaryId,
+  relatedIds
+) => {
   return new Promise((resolve, reject) => {
-    if (!tableName || !column1 || !column2 || !primaryId || !Array.isArray(relatedIds)) {
-      return reject(new Error("All parameters are required and relatedIds must be an array."));
+    if (
+      !tableName ||
+      !column1 ||
+      !column2 ||
+      !primaryId ||
+      !Array.isArray(relatedIds)
+    ) {
+      return reject(
+        new Error(
+          "All parameters are required and relatedIds must be an array."
+        )
+      );
     }
 
     const values = relatedIds.map((rid) => [primaryId, rid]);
@@ -279,7 +321,6 @@ const assignManyToMany = (tableName, column1, column2, primaryId, relatedIds) =>
   });
 };
 
-
 module.exports = {
   createTable,
   checkRecordExists,
@@ -292,5 +333,6 @@ module.exports = {
   getEsoasStats,
   getRolesWithPermissions,
   assignManyToMany,
-  assignPermissionsToRole
+  assignPermissionsToRole,
+  getTodaysClaimsCount,
 };

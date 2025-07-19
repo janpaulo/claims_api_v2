@@ -73,6 +73,7 @@ const login = async (req, res) => {
         userId: existingUser.userId,
         email: existingUser.email,
         hci_no: existingUser.hci_no,
+        role_id: existingUser.role_id,
         access_token: generateAccessToken(existingUser.userId),
         hospital: {
           hos_id: existingUser.hos_id,
@@ -82,6 +83,8 @@ const login = async (req, res) => {
           is_active: existingUser.is_active,
           created_by: existingUser.created_by,
           username_code: existingUser.username_code,
+          hopital_code: existingUser.hopital_code,
+          software_cert: existingUser.software_cert,
         },
       });
     } else {

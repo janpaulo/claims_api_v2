@@ -13,7 +13,7 @@ const createESOA = async (req, res) => {
     xml_data
   } = req.body;
 
-  if (!professional_fee || !hci_no || !total_amount || !sum_philhealth_amount || !prof_philhealth_amount || !xml_data) {
+  if (!hci_no || !sum_philhealth_amount || !prof_philhealth_amount || !xml_data) {
     return res.status(400).json({ error: "All fields are required!" });
   }
 
@@ -70,7 +70,7 @@ const getEsoaPerHci = async (req, res) => {
   const { hci_no } = req.params;
 
   try {
-    const esoa = await checkRecordExists("esoa", "hci_no", hci_no);
+    const esoa = await checkRecordExists("esoa", "hci_no", hci_no,true);
     // if (!esoa) {
     //   return res.status(404).json({ error: "Esoa not found" });
     // }
@@ -78,7 +78,7 @@ const getEsoaPerHci = async (req, res) => {
     
     res.status(200).json({
       message: "Esoa statistics retrieved successfully!",
-      esoa:!esoa ? [] :[esoa]
+      esoa:!esoa ? [] :esoa
     });
   } catch (error) {
     console.error("Error updating Esoa:", error);
