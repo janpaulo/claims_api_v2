@@ -54,7 +54,7 @@ CREATE TABLE `claims` (
   `xml_data` longtext DEFAULT NULL,
   `hci_no` varchar(200) NOT NULL,
   `hci_code` varchar(20) NOT NULL,
-  `date_created` date NOT NULL DEFAULT current_timestamp()
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -78,7 +78,7 @@ CREATE TABLE `claims_form3` (
   `status` varchar(250) NOT NULL,
   `xml_data` longtext DEFAULT NULL,
   `hci_no` varchar(200) NOT NULL,
-  `date_created` date NOT NULL DEFAULT current_timestamp()
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -95,7 +95,7 @@ CREATE TABLE `claims_form4` (
   `status` varchar(250) NOT NULL,
   `xml_data` longtext DEFAULT NULL,
   `hci_no` varchar(200) NOT NULL,
-  `date_created` date NOT NULL DEFAULT current_timestamp()
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -112,7 +112,7 @@ CREATE TABLE `claims_form5` (
   `status` varchar(250) NOT NULL,
   `xml_data` longtext DEFAULT NULL,
   `hci_no` varchar(200) NOT NULL,
-  `date_created` date NOT NULL DEFAULT current_timestamp()
+  `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -4574,14 +4574,14 @@ CREATE TABLE `hospital_accounts` (
   `username_code` varchar(150) NOT NULL,
   `is_active` enum('active','inactive') NOT NULL,
   `created_by` varchar(20) NOT NULL,
-  `date_ceated` date NOT NULL DEFAULT current_timestamp()
+  `date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `hospital_accounts`
 --
 
-INSERT INTO `hospital_accounts` (`hos_id`, `hospital_name`, `hopital_code`, `accreditation_num`, `cypher_key`, `software_cert`, `username_code`, `is_active`, `created_by`, `date_ceated`) VALUES
+INSERT INTO `hospital_accounts` (`hos_id`, `hospital_name`, `hopital_code`, `accreditation_num`, `cypher_key`, `software_cert`, `username_code`, `is_active`, `created_by`, `date_created`) VALUES
 (1, 'hopital one1', '300806', 'H93005836', 'DummyCipherKey300806', 'ECLAIMS-3.0-300806-DUMMY', 'ECLAIMS-3.0-300806-DUMMY', 'active', '1a7b7851-4755-41f3-b', '0000-00-00'),
 (2, 'hopital two', '', '87654321', 'asasghjhjhjghjhg', '', '', 'active', '1a7b7851-4755-41f3-b', '2025-03-27');
 
