@@ -17,13 +17,20 @@ const attachedFilesRoutes = require("./routes/attachedFilesRoutes");
 const claimsForm3Routes = require("./routes/claimsForm3Routes");
 const claimsForm4Routes = require("./routes/claimsForm4Routes");
 const claimsForm5Routes = require("./routes/claimsForm5Routes");
+const fileBrowserRoutes = require("./routes/fileBrowserRoutes");
 
 
 const esoaUnitRoutes = require("./routes/esoaUnitRoutes");
 const esoaItemRoutes = require("./routes/esoaItemRoutes");
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: '*',  
+  credentials: true, 
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", authRoutes, profileRoutes,claimsRoutes,esoaRoutes,hospitalsRoutes,rolesRoutes,permissionRoutes);
@@ -33,6 +40,8 @@ app.use("/claims-form4", claimsForm4Routes);
 app.use("/claims-form5", claimsForm5Routes);
 app.use("/esoa-units", esoaUnitRoutes);
 app.use("/esoa-items", esoaItemRoutes);
+app.use("/file-browser", fileBrowserRoutes);
+
 
 connectDB();
 

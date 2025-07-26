@@ -33,8 +33,6 @@ const checkRecordExists = (tableName, column, value, multiple = false) => {
     } else {
       query = `SELECT * FROM ${tableName} WHERE ${column} = ?`;
     }
-
-    console.log(params);
     pool.query(query, params, (err, results) => {
       if (err) {
         reject(err);
