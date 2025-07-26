@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: claims_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: claims_db
+      MYSQL_USER: claims_user
+      MYSQL_PASSWORD: claims_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./claims_api.sql:/docker-entrypoint-initdb.d/claims_api.sql
+    ports:
+      - "3306:3306"
+
+  api:
+    build: .
+    container_name: claims_api
+    restart: always
+    ports:
+      - "5001:5001"  # 🔥 Host:Container
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+
+volumes:
+  mysql_data:
