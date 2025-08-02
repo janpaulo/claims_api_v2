@@ -6,6 +6,8 @@ const {
   createTable,
   checkRecordExists,
   insertRecord,
+  getRecordById,
+  updateRecord,
 } = require("../utils/sqlFunctions");
 const profileSchema = require("../schemas/profileSchema");
 
@@ -14,7 +16,7 @@ const generateAccessToken = (userId) => {
 };
 
 const register = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, hci_no} = req.body;
   if (!email || !password) {
     res
       .status(400)
@@ -27,6 +29,7 @@ const register = async (req, res) => {
     userId: uuidv4(),
     email,
     password: hashedPassword,
+    hci_no: hci_no,
   };
 
   const profile = {
@@ -83,7 +86,7 @@ const login = async (req, res) => {
           is_active: existingUser.is_active,
           created_by: existingUser.created_by,
           username_code: existingUser.username_code,
-          hopital_code: existingUser.hopital_code,
+          hospital_code: existingUser.hospital_code,
           software_cert: existingUser.software_cert,
         },
       });
@@ -95,7 +98,44 @@ const login = async (req, res) => {
   }
 };
 
+
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { email, password, hci_no } = req.body;
+
+  if (!email && !password && !hci_no) {
+    return res.status(400).json({
+      error: "Please provide at least one of: email, password, or hci_no.",
+    });
+  }
+
+  try {
+    const user = await getRecordById("users", "userId", id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const updates = {};
+    if (email) updates.email = email;
+    if (hci_no) updates.hci_no = hci_no;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      updates.password = hashedPassword;
+    }
+
+    await updateRecord("users", updates, "userId", id);
+
+    res.status(200).json({ message: "User updated successfully." });
+  } catch (err) {
+    console.error("Error updating user:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
 module.exports = {
   register,
   login,
+  updateUser,
 };

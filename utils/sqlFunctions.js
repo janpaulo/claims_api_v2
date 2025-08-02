@@ -157,7 +157,7 @@ const getRecordById = (tableName, column, value) => {
       if (err) {
         reject(err);
       } else {
-        resolve(results.length ? results[0] : null);
+        resolve(results.length ? tableName==="users"? results: results[0] : null);
       }
     });
   });

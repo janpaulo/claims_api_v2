@@ -22,6 +22,9 @@ const fileBrowserRoutes = require("./routes/fileBrowserRoutes");
 
 const esoaUnitRoutes = require("./routes/esoaUnitRoutes");
 const esoaItemRoutes = require("./routes/esoaItemRoutes");
+const tsekapLibRoutes = require("./routes/tsekapLibRoutes");
+
+
 const app = express();
 
 const corsOptions = {
@@ -41,6 +44,7 @@ app.use("/claims-form5", claimsForm5Routes);
 app.use("/esoa-units", esoaUnitRoutes);
 app.use("/esoa-items", esoaItemRoutes);
 app.use("/file-browser", fileBrowserRoutes);
+app.use("/api/tsekap", tsekapLibRoutes);
 
 
 connectDB();

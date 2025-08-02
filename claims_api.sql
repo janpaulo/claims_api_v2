@@ -4567,7 +4567,7 @@ INSERT INTO `esoa_unit_lib` (`unit_id`, `unit_desc`, `status`, `date_inserted`, 
 CREATE TABLE `hospital_accounts` (
   `hos_id` int(11) NOT NULL,
   `hospital_name` varchar(200) NOT NULL,
-  `hopital_code` varchar(50) NOT NULL,
+  `hospital_code` varchar(50) NOT NULL,
   `accreditation_num` varchar(11) NOT NULL,
   `cypher_key` varchar(50) NOT NULL,
   `software_cert` varchar(100) NOT NULL,
@@ -4581,7 +4581,7 @@ CREATE TABLE `hospital_accounts` (
 -- Dumping data for table `hospital_accounts`
 --
 
-INSERT INTO `hospital_accounts` (`hos_id`, `hospital_name`, `hopital_code`, `accreditation_num`, `cypher_key`, `software_cert`, `username_code`, `is_active`, `created_by`, `date_created`) VALUES
+INSERT INTO `hospital_accounts` (`hos_id`, `hospital_name`, `hospital_code`, `accreditation_num`, `cypher_key`, `software_cert`, `username_code`, `is_active`, `created_by`, `date_created`) VALUES
 (1, 'hopital one1', '300806', 'H93005836', 'DummyCipherKey300806', 'ECLAIMS-3.0-300806-DUMMY', 'ECLAIMS-3.0-300806-DUMMY', 'active', '1a7b7851-4755-41f3-b', '0000-00-00'),
 (2, 'hopital two', '', '87654321', 'asasghjhjhjghjhg', '', '', 'active', '1a7b7851-4755-41f3-b', '2025-03-27');
 
