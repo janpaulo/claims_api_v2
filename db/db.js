@@ -1,16 +1,27 @@
 const mysql = require("mysql");
-const config = require("./config");
+const dotenv = require("dotenv");
+dotenv.config();
 
-const connectDB = async () => {
-  const pool = mysql.createPool(config);
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
 
+const connectDB = () => {
   pool.getConnection((err, connection) => {
     if (err) {
-      console.log({ error: err.message });
+      console.error("Database connection failed:", err.message);
+      process.exit(1);
+    } else {
+      console.log("Connected to MySQL database.");
+      connection.release();
     }
-
-    console.log("Connected to MySQL database");
-    connection.release();
   });
 };
 
