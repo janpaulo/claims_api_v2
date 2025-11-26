@@ -15,7 +15,7 @@ const createClaim = async (req, res) => {
     status,
     hci_no,
     date_created,
-    xml_data,
+    xml_data,hci_code,
   } = req.body;
 
   if (
@@ -25,7 +25,8 @@ const createClaim = async (req, res) => {
     !status ||
     !hci_no ||
     !date_created ||
-    !xml_data
+    !xml_data||
+    !hci_code
   ) {
     return res.status(400).json({ error: "All fields are required!" });
   }
@@ -38,6 +39,7 @@ const createClaim = async (req, res) => {
     hci_no,
     date_created,
     xml_data,
+    hci_code,
   };
 
   try {
@@ -76,15 +78,15 @@ const getClaimsStats = async (req, res) => {
 };
 const getClaimsNumber = async (req, res) => {
   try {
-    const { hci_no } = req.params;
+    const { hci_code } = req.params;
 
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
 
-    const count = await getTodaysClaimsCount(hci_no);
-    const reference = `${hci_no}-${mm}-${dd}-${yyyy}-${count + 1}`;
+    const count = await getTodaysClaimsCount(hci_code);
+    const reference = `${hci_code}-${mm}-${dd}-${yyyy}-${count + 1}`;
 
     res.status(200).json({ reference });
   } catch (error) {

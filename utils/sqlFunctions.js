@@ -61,7 +61,7 @@ const getAllRecord = (tableName, column, value) => {
   });
 };
 
-const getTodaysClaimsCount = (hci_no) => {
+const getTodaysClaimsCount = (hci_code) => {
   return new Promise((resolve, reject) => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -72,10 +72,10 @@ const getTodaysClaimsCount = (hci_no) => {
     const query = `
       SELECT COUNT(*) AS count 
       FROM claims 
-      WHERE DATE(date_created) = ? AND hci_no = ?
+      WHERE DATE(date_created) = ? AND hci_code = ?
     `;
 
-    pool.query(query, [dateStr, hci_no], (err, results) => {
+    pool.query(query, [dateStr, hci_code], (err, results) => {
       if (err) reject(err);
       else resolve(results[0].count);
     });
