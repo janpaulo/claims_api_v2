@@ -45,21 +45,34 @@ const checkRecordExists = (tableName, column, value, multiple = false) => {
       }
     });
   });
-};
-
-const getAllRecord = (tableName, column, value) => {
+};const getAllRecord = (tableName) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT * FROM ${tableName}`;
 
-    pool.query(query, [value], (err, results) => {
-      if (err) {
-        reject(err);
-      } else {
+    const checkColumnQuery = `
+      SELECT COLUMN_NAME 
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE table_name = ? 
+        AND column_name = 'library_status';
+    `;
+
+    pool.query(checkColumnQuery, [tableName], (err, columnResults) => {
+      if (err) return reject(err);
+
+      const hasStatusColumn = columnResults.length > 0;
+
+      // Build query dynamically
+      const query = hasStatusColumn
+        ? `SELECT * FROM ?? WHERE library_status = 1`
+        : `SELECT * FROM ??`;
+
+      pool.query(query, [tableName], (err, results) => {
+        if (err) return reject(err);
         resolve(results.length ? results : []);
-      }
+      });
     });
   });
 };
+
 
 const getTodaysClaimsCount = (hci_code) => {
   return new Promise((resolve, reject) => {
