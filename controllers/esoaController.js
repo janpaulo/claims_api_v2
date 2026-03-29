@@ -5,6 +5,7 @@ const { insertRecord, getAllRecord,getEsoasStats,checkRecordExists } = require("
 // Create ESOA
 const createESOA = async (req, res) => {
   const {
+    ref_id,
     professional_fee,
     hci_no,
     total_amount,
@@ -18,6 +19,7 @@ const createESOA = async (req, res) => {
   }
 
   const esoaData = {
+    ref_id,
     professional_fee,
     hci_no,
     total_amount,
@@ -66,6 +68,29 @@ const getESOA = async (req, res) => {
   }
 };
 
+
+
+
+const getEsoAttachRefId = async (req, res) => {
+  const { ref_id } = req.params;
+
+  try {
+    const esoa = await checkRecordExists("esoa", "ref_id", ref_id,true);
+    // if (!esoa) {
+    //   return res.status(404).json({ error: "Esoa not found" });
+    // }
+
+    
+    res.status(200).json({
+      message: "Esoa statistics retrieved successfully!",
+      esoa:!esoa ? [] :esoa
+    });
+  } catch (error) {
+    console.error("Error updating Esoa:", error);
+    res.status(500).json({ error: "Failed to  Esoa. Please try again later." });
+  }
+};
+
 const getEsoaPerHci = async (req, res) => {
   const { hci_no } = req.params;
 
@@ -91,5 +116,6 @@ module.exports = {
   createESOA,
   getESOA,
   getEsoaStats,
-  getEsoaPerHci
+  getEsoaPerHci,
+  getEsoAttachRefId
 };

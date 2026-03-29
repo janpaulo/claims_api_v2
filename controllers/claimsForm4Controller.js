@@ -10,13 +10,14 @@ const {
   
   // Create
   const createClaimForm4 = async (req, res) => {
-    const { series_no, member_pin, date_admited, status, xml_data, hci_no } = req.body;
-    if (!series_no || !member_pin || !date_admited || !status || !hci_no) {
+    const { ref_id,series_no, member_pin, date_admited, status, xml_data, hci_no } = req.body;
+    if (!ref_id || !series_no || !member_pin || !date_admited || !status || !hci_no) {
       return res.status(400).json({ error: "Missing required fields." });
     }
   
     try {
       const result = await insertRecord(table, {
+        ref_id,
         series_no,
         member_pin,
         date_admited,
@@ -46,6 +47,17 @@ const {
   const getClaimForm4ById = async (req, res) => {
     try {
       const result = await getRecordById(table, "id", req.params.id);
+      if (!result) return res.status(404).json({ message: "Not found" });
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch record" });
+    }
+  };
+  
+  
+  const getClaimForm4AttachRefId = async (req, res) => {
+    try {
+      const result = await getRecordById(table, "ref_id", req.params.ref_id);
       if (!result) return res.status(404).json({ message: "Not found" });
       res.status(200).json(result);
     } catch (err) {
@@ -88,6 +100,7 @@ const {
     getClaimForm4s,
     getClaimForm4ById,
     updateClaimForm4,
-    deleteClaimForm4
+    deleteClaimForm4,
+    getClaimForm4AttachRefId
   };
   

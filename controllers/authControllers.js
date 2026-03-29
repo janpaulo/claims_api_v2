@@ -101,11 +101,11 @@ const login = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { email, password, hci_no } = req.body;
+  const { email, password, hci_no, role_id} = req.body;
 
-  if (!email && !password && !hci_no) {
+  if (!email && !password && !hci_no && !role_id) {
     return res.status(400).json({
-      error: "Please provide at least one of: email, password, or hci_no.",
+      error: "Please provide at least one of: email, password, hci_no, or role_id.",
     });
   }
 
@@ -117,13 +117,13 @@ const updateUser = async (req, res) => {
 
     const updates = {};
     if (email) updates.email = email;
+    if (role_id) updates.role_id = role_id;
     if (hci_no) updates.hci_no = hci_no;
     if (password) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       updates.password = hashedPassword;
     }
-
     await updateRecord("users", updates, "userId", id);
 
     res.status(200).json({ message: "User updated successfully." });

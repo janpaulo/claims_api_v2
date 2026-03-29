@@ -197,6 +197,7 @@ const updateRecord = (tableName, updates, column, value) => {
     const columnValues = Object.keys(updates)
       .map((column) => `${column} = ?`)
       .join(", ");
+      console.log(columnValues)
     const query = `UPDATE ${tableName} SET ${columnValues} WHERE ${column} = ?`;
 
     pool.query(query, [...Object.values(updates), value], (err, results) => {
