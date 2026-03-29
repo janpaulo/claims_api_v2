@@ -1,33 +1,47 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: claims_mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: claims_db
-      MYSQL_USER: claims_user
-      MYSQL_PASSWORD: claims_pass
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./claims_api.sql:/docker-entrypoint-initdb.d/claims_api.sql
-    ports:
-      - "3306:3306"
-
   api:
     build: .
-    container_name: claims_api
-    restart: always
+    container_name: node_backend
+    restart: unless-stopped
     ports:
-      - "5001:5001"  # 🔥 Host:Container
+      - "5001:5001"
     env_file:
       - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - files_data:/app/files
     depends_on:
       - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
     volumes:
-      - .:/app
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"
 
 volumes:
   mysql_data:
+  files_data:
