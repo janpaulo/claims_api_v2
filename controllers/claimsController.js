@@ -15,7 +15,6 @@ const createClaim = async (req, res) => {
     date_admited,
     status,
     hci_no,
-    date_created,
     xml_data,
     hci_code,
   } = req.body;
@@ -26,7 +25,6 @@ const createClaim = async (req, res) => {
     !date_admited ||
     !status ||
     !hci_no ||
-    !date_created ||
     !xml_data ||
     !hci_code
   ) {
