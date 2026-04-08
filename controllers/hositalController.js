@@ -19,6 +19,7 @@ const createHospital = async (req, res) => {
     software_cert,
     username_code,
     is_active = "active",
+    service_features = "{}",
   } = req.body;
 
   if (!hospital_name || !accreditation_num || !cypher_key || !created_by) {
@@ -35,6 +36,7 @@ const createHospital = async (req, res) => {
     hospital_code,
     software_cert,
     username_code,
+    service_features,
   };
 
   try {
@@ -142,6 +144,7 @@ const updateHospital = async (req, res) => {
     hospital_code,
     software_cert,
     username_code,
+    service_features = "{}",
   } = req.body;
 
   // Check if all required fields are provided
@@ -160,6 +163,7 @@ const updateHospital = async (req, res) => {
       hospital_code,
       software_cert,
       username_code,
+      service_features,
     };
 
     // Call updateRecord with the table name, update object, column name ('hos_id'), and ID

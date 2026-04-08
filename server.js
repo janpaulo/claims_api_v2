@@ -18,6 +18,7 @@ const claimsForm3Routes = require("./routes/claimsForm3Routes");
 const claimsForm4Routes = require("./routes/claimsForm4Routes");
 const claimsForm5Routes = require("./routes/claimsForm5Routes");
 const fileBrowserRoutes = require("./routes/fileBrowserRoutes");
+const { ensureHospitalServiceFeaturesColumn } = require("./utils/sqlFunctions");
 
 
 const esoaUnitRoutes = require("./routes/esoaUnitRoutes");
@@ -48,7 +49,14 @@ app.use("/api/tsekap", tsekapLibRoutes);
 
 
 connectDB();
+ensureHospitalServiceFeaturesColumn()
+  .then(() => console.log("hospital_accounts.service_features is ready."))
+  .catch((error) =>
+    console.error("Failed to ensure hospital service_features column:", error.message),
+  );
 
 app.listen(port, () => {
   console.log(`Server running on port: ${port}`);
 });
+
+

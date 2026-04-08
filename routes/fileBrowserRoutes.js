@@ -37,7 +37,7 @@ router.get("/list", async (req, res) => {
         if (!name || name === "../" || !name.endsWith(".enc")) return;
         fileList.push({
           name,
-          url: remoteFileURL + name,
+          path: remoteFileURL + name,
         });
       });
     }

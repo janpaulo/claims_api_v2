@@ -96,6 +96,39 @@ const getTodaysClaimsCount = (hci_code) => {
 };
 
 
+
+const getClaimsByHciPaginated = (hci_no, page = 1, limit = 10) => {
+  return new Promise((resolve, reject) => {
+    const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
+    const safeLimit = Math.max(1, Math.min(100, Number.parseInt(limit, 10) || 10));
+    const offset = (safePage - 1) * safeLimit;
+
+    const countQuery = "SELECT COUNT(*) AS total FROM claims WHERE hci_no = ?";
+    const dataQuery = `
+      SELECT *
+      FROM claims
+      WHERE hci_no = ?
+      ORDER BY date_created DESC, id DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    pool.query(countQuery, [hci_no], (countErr, countResults) => {
+      if (countErr) return reject(countErr);
+
+      const total = Number(countResults?.[0]?.total || 0);
+      pool.query(dataQuery, [hci_no, safeLimit, offset], (dataErr, rows) => {
+        if (dataErr) return reject(dataErr);
+        resolve({
+          claims: Array.isArray(rows) ? rows : [],
+          total,
+          page: safePage,
+          limit: safeLimit,
+          totalPages: Math.max(1, Math.ceil(total / safeLimit)),
+        });
+      });
+    });
+  });
+};
 const getClaimStats = () => {
   return new Promise((resolve, reject) => {
     const totalQuery = `
@@ -333,6 +366,36 @@ const assignManyToMany = (
   });
 };
 
+const ensureHospitalServiceFeaturesColumn = () => {
+  return new Promise((resolve, reject) => {
+    const checkColumnQuery = `
+      SELECT COLUMN_NAME
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'hospital_accounts'
+        AND COLUMN_NAME = 'service_features'
+    `;
+
+    pool.query(checkColumnQuery, (checkErr, checkResults) => {
+      if (checkErr) return reject(checkErr);
+      if (Array.isArray(checkResults) && checkResults.length > 0) {
+        return resolve({ message: 'service_features column already exists' });
+      }
+
+      const alterQuery = `
+        ALTER TABLE hospital_accounts
+        ADD COLUMN service_features LONGTEXT NULL
+        AFTER username_code
+      `;
+
+      pool.query(alterQuery, (alterErr, alterResults) => {
+        if (alterErr) return reject(alterErr);
+        resolve(alterResults);
+      });
+    });
+  });
+};
+
 module.exports = {
   createTable,
   checkRecordExists,
@@ -347,4 +410,9 @@ module.exports = {
   assignManyToMany,
   assignPermissionsToRole,
   getTodaysClaimsCount,
+  getClaimsByHciPaginated,
+  ensureHospitalServiceFeaturesColumn,
 };
+
+
+

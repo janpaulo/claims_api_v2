@@ -4572,6 +4572,7 @@ CREATE TABLE `hospital_accounts` (
   `cypher_key` varchar(50) NOT NULL,
   `software_cert` varchar(100) NOT NULL,
   `username_code` varchar(150) NOT NULL,
+  `service_features` longtext DEFAULT NULL,
   `is_active` enum('active','inactive') NOT NULL,
   `created_by` varchar(20) NOT NULL,
   `date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -5046,3 +5047,5 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+

@@ -88,6 +88,7 @@ const login = async (req, res) => {
           username_code: existingUser.username_code,
           hospital_code: existingUser.hospital_code,
           software_cert: existingUser.software_cert,
+          service_features: existingUser.service_features,
         },
       });
     } else {
@@ -139,3 +140,5 @@ module.exports = {
   login,
   updateUser,
 };
+
+
