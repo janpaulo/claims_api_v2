@@ -7,6 +7,33 @@ const {
   updateRecord,
   deleteRecord,
 } = require("../utils/sqlFunctions");
+const mapDuplicateFieldMessage = (field) => {
+  const map = {
+    hospital_name: "Hospital name already exists.",
+    accreditation_num: "Accreditation number already exists.",
+    hospital_code: "Hospital code already exists.",
+    username_code: "Username code already exists.",
+    cypher_key: "Cypher key already exists.",
+    software_cert: "Software certificate already exists.",
+  };
+  return map[field] || `${field} already exists.`;
+};
+
+const buildDuplicateResponse = (err) => {
+  if (!err || err.code !== "ER_DUP_ENTRY") return null;
+  const keyMatch = String(err.sqlMessage || "").match(/key '([^']+)'/i);
+  const duplicatedKey = keyMatch ? keyMatch[1] : "value";
+  const duplicatedField = duplicatedKey.includes(".")
+    ? duplicatedKey.split(".").pop()
+    : duplicatedKey;
+  const field = String(duplicatedField || "value").replace(/_unique$/i, "");
+  const message = mapDuplicateFieldMessage(field);
+  return {
+    error: message,
+    field,
+    fieldErrors: { [field]: message },
+  };
+};
 
 // Create Hospital Account
 const createHospital = async (req, res) => {
@@ -46,6 +73,10 @@ const createHospital = async (req, res) => {
       .json({ message: "Hospital account created successfully!", result });
   } catch (error) {
     console.error("Error creating hospital account:", error);
+    const duplicate = buildDuplicateResponse(error);
+    if (duplicate) {
+      return res.status(409).json(duplicate);
+    }
     res.status(500).json({
       error: "Failed to create hospital account. Please try again later.",
     });
@@ -180,6 +211,10 @@ const updateHospital = async (req, res) => {
       .json({ message: "Hospital account updated successfully!", result });
   } catch (error) {
     console.error("Error updating hospital account:", error);
+    const duplicate = buildDuplicateResponse(error);
+    if (duplicate) {
+      return res.status(409).json(duplicate);
+    }
     res.status(500).json({
       error: "Failed to update hospital account. Please try again later.",
     });
@@ -219,3 +254,5 @@ module.exports = {
   getHospitalByAccreNo,
   getHospitalByIdUsers,
 };
+
+

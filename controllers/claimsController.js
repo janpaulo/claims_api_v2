@@ -282,5 +282,3 @@ module.exports = {
   getClaimsNumber,
   getClaimMembers,
 };
-
-

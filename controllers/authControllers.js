@@ -11,25 +11,50 @@ const {
 } = require("../utils/sqlFunctions");
 const profileSchema = require("../schemas/profileSchema");
 
+const mapDuplicateFieldMessage = (field) => {
+  const map = {
+    email: "Email already exists.",
+    hci_no: "Hospital accreditation number is already in use.",
+  };
+  return map[field] || `${field} already exists.`;
+};
+
+const buildDuplicateResponse = (err) => {
+  if (!err || err.code !== "ER_DUP_ENTRY") return null;
+  const keyMatch = String(err.sqlMessage || "").match(/key '([^']+)'/i);
+  const duplicatedKey = keyMatch ? keyMatch[1] : "value";
+  const duplicatedField = duplicatedKey.includes(".")
+    ? duplicatedKey.split(".").pop()
+    : duplicatedKey;
+  const field = String(duplicatedField || "value").replace(/_unique$/i, "");
+  const message = mapDuplicateFieldMessage(field);
+  return {
+    error: message,
+    field,
+    fieldErrors: { [field]: message },
+  };
+};
+
 const generateAccessToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 const register = async (req, res) => {
-  const { email, password, hci_no} = req.body;
+  const { email, password, hci_no } = req.body;
   if (!email || !password) {
     res
       .status(400)
       .json({ error: "Email or Password fields cannot be empty!" });
     return;
   }
+
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const user = {
     userId: uuidv4(),
     email,
     password: hashedPassword,
-    hci_no: hci_no,
+    hci_no,
   };
 
   const profile = {
@@ -44,14 +69,22 @@ const register = async (req, res) => {
 
     const userAlreadyExists = await checkRecordExists("users", "email", email);
     if (userAlreadyExists) {
-      res.status(409).json({ error: "Email already exists" });
-    } else {
-      await insertRecord("users", user);
-      await insertRecord("profiles", profile);
-
-      res.status(201).json({ message: "user created successfully!" });
+      return res.status(409).json({
+        error: "Email already exists.",
+        field: "email",
+        fieldErrors: { email: "Email already exists." },
+      });
     }
+
+    await insertRecord("users", user);
+    await insertRecord("profiles", profile);
+
+    res.status(201).json({ message: "user created successfully!" });
   } catch (error) {
+    const duplicate = buildDuplicateResponse(error);
+    if (duplicate) {
+      return res.status(409).json(duplicate);
+    }
     res.status(500).json({ error: error.message });
   }
 };
@@ -59,7 +92,9 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ error: "Email or Password fields cannot be empty!" });
+    return res
+      .status(400)
+      .json({ error: "Email or Password fields cannot be empty!" });
   }
 
   try {
@@ -91,18 +126,17 @@ const login = async (req, res) => {
           service_features: existingUser.service_features,
         },
       });
-    } else {
-      return res.status(401).json({ error: "Invalid credentials" });
     }
+
+    return res.status(401).json({ error: "Invalid credentials" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { email, password, hci_no, role_id} = req.body;
+  const { email, password, hci_no, role_id } = req.body;
 
   if (!email && !password && !hci_no && !role_id) {
     return res.status(400).json({
@@ -125,20 +159,22 @@ const updateUser = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, salt);
       updates.password = hashedPassword;
     }
+
     await updateRecord("users", updates, "userId", id);
 
     res.status(200).json({ message: "User updated successfully." });
   } catch (err) {
     console.error("Error updating user:", err);
+    const duplicate = buildDuplicateResponse(err);
+    if (duplicate) {
+      return res.status(409).json(duplicate);
+    }
     res.status(500).json({ error: "Internal server error." });
   }
 };
-
 
 module.exports = {
   register,
   login,
   updateUser,
 };
-
-
