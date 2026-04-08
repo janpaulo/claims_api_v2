@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require("uuid");
+﻿const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 const userSchema = require("../schemas/userSchema");
 const bcrypt = require("bcryptjs");
@@ -40,12 +40,19 @@ const generateAccessToken = (userId) => {
 };
 
 const register = async (req, res) => {
-  const { email, password, hci_no } = req.body;
+  const { email, password, hci_no, role_id } = req.body;
   if (!email || !password) {
-    res
+    return res
       .status(400)
       .json({ error: "Email or Password fields cannot be empty!" });
-    return;
+  }
+
+  if (role_id === undefined || role_id === null || String(role_id).trim() === "") {
+    return res.status(400).json({
+      error: "Role is required.",
+      field: "role_id",
+      fieldErrors: { role_id: "Role is required." },
+    });
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -55,6 +62,7 @@ const register = async (req, res) => {
     email,
     password: hashedPassword,
     hci_no,
+    role_id: Number(role_id),
   };
 
   const profile = {
@@ -152,7 +160,9 @@ const updateUser = async (req, res) => {
 
     const updates = {};
     if (email) updates.email = email;
-    if (role_id) updates.role_id = role_id;
+    if (role_id !== undefined && role_id !== null && String(role_id).trim() !== "") {
+      updates.role_id = Number(role_id);
+    }
     if (hci_no) updates.hci_no = hci_no;
     if (password) {
       const salt = await bcrypt.genSalt(10);
