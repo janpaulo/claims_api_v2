@@ -99,11 +99,21 @@ const getTodaysClaimsCount = (hci_code) => {
 
 const getClaimsByHciPaginated = (hci_no, page = 1, limit = 10) => {
   return new Promise((resolve, reject) => {
+    const wantsAll =
+      String(limit || "")
+        .trim()
+        .toLowerCase() === "all";
     const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
     const safeLimit = Math.max(1, Math.min(100, Number.parseInt(limit, 10) || 10));
     const offset = (safePage - 1) * safeLimit;
 
     const countQuery = "SELECT COUNT(*) AS total FROM claims WHERE hci_no = ?";
+    const allDataQuery = `
+      SELECT *
+      FROM claims
+      WHERE hci_no = ?
+      ORDER BY date_created DESC, id DESC
+    `;
     const dataQuery = `
       SELECT *
       FROM claims
@@ -116,14 +126,17 @@ const getClaimsByHciPaginated = (hci_no, page = 1, limit = 10) => {
       if (countErr) return reject(countErr);
 
       const total = Number(countResults?.[0]?.total || 0);
-      pool.query(dataQuery, [hci_no, safeLimit, offset], (dataErr, rows) => {
+      const query = wantsAll ? allDataQuery : dataQuery;
+      const params = wantsAll ? [hci_no] : [hci_no, safeLimit, offset];
+
+      pool.query(query, params, (dataErr, rows) => {
         if (dataErr) return reject(dataErr);
         resolve({
           claims: Array.isArray(rows) ? rows : [],
           total,
           page: safePage,
-          limit: safeLimit,
-          totalPages: Math.max(1, Math.ceil(total / safeLimit)),
+          limit: wantsAll ? total : safeLimit,
+          totalPages: wantsAll ? 1 : Math.max(1, Math.ceil(total / safeLimit)),
         });
       });
     });
@@ -396,6 +409,61 @@ const ensureHospitalServiceFeaturesColumn = () => {
   });
 };
 
+const ensureHospitalProfileColumns = () => {
+  return new Promise((resolve, reject) => {
+    const requiredColumns = [
+      {
+        name: "address",
+        definition: "ADD COLUMN address TEXT NULL AFTER accreditation_num",
+      },
+      {
+        name: "contact_number",
+        definition: "ADD COLUMN contact_number VARCHAR(50) NULL AFTER address",
+      },
+      {
+        name: "logo",
+        definition: "ADD COLUMN logo LONGTEXT NULL AFTER contact_number",
+      },
+    ];
+
+    const ensureNextColumn = (index) => {
+      if (index >= requiredColumns.length) {
+        resolve({ message: "hospital profile columns are ready" });
+        return;
+      }
+
+      const currentColumn = requiredColumns[index];
+      const checkColumnQuery = `
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'hospital_accounts'
+          AND COLUMN_NAME = ?
+      `;
+
+      pool.query(checkColumnQuery, [currentColumn.name], (checkErr, checkResults) => {
+        if (checkErr) return reject(checkErr);
+        if (Array.isArray(checkResults) && checkResults.length > 0) {
+          ensureNextColumn(index + 1);
+          return;
+        }
+
+        const alterQuery = `
+          ALTER TABLE hospital_accounts
+          ${currentColumn.definition}
+        `;
+
+        pool.query(alterQuery, (alterErr) => {
+          if (alterErr) return reject(alterErr);
+          ensureNextColumn(index + 1);
+        });
+      });
+    };
+
+    ensureNextColumn(0);
+  });
+};
+
 module.exports = {
   createTable,
   checkRecordExists,
@@ -412,6 +480,7 @@ module.exports = {
   getTodaysClaimsCount,
   getClaimsByHciPaginated,
   ensureHospitalServiceFeaturesColumn,
+  ensureHospitalProfileColumns,
 };
 
 

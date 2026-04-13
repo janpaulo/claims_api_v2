@@ -40,6 +40,9 @@ const createHospital = async (req, res) => {
   const {
     hospital_name,
     accreditation_num,
+    address = "",
+    contact_number = "",
+    logo = "",
     cypher_key,
     created_by,
     hospital_code,
@@ -56,6 +59,9 @@ const createHospital = async (req, res) => {
   const hospitalData = {
     hospital_name,
     accreditation_num,
+    address,
+    contact_number,
+    logo,
     cypher_key,
     is_active,
     created_by,
@@ -169,6 +175,9 @@ const updateHospital = async (req, res) => {
   const {
     hospital_name,
     accreditation_num,
+    address = "",
+    contact_number = "",
+    logo = "",
     cypher_key,
     is_active,
     created_by,
@@ -188,6 +197,9 @@ const updateHospital = async (req, res) => {
     const updates = {
       hospital_name,
       accreditation_num,
+      address,
+      contact_number,
+      logo,
       cypher_key,
       is_active, // Optional field
       created_by, // Optional field, usually for who created the record

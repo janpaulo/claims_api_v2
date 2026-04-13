@@ -97,7 +97,10 @@ const getClaimsNumber = async (req, res) => {
 const getClaimPerHci = async (req, res) => {
   const { hci_no } = req.params;
   const page = Number.parseInt(req.query.page, 10) || 1;
-  const limit = Number.parseInt(req.query.limit, 10) || 10;
+  const limit =
+    String(req.query.limit || "").trim().toLowerCase() === "all"
+      ? "all"
+      : Number.parseInt(req.query.limit, 10) || 10;
 
   try {
     const paged = await getClaimsByHciPaginated(hci_no, page, limit);

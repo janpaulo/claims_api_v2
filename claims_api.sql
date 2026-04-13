@@ -4569,6 +4569,9 @@ CREATE TABLE `hospital_accounts` (
   `hospital_name` varchar(200) NOT NULL,
   `hospital_code` varchar(50) NOT NULL,
   `accreditation_num` varchar(11) NOT NULL,
+  `address` text DEFAULT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
+  `logo` longtext DEFAULT NULL,
   `cypher_key` varchar(50) NOT NULL,
   `software_cert` varchar(100) NOT NULL,
   `username_code` varchar(150) NOT NULL,
@@ -4582,8 +4585,8 @@ CREATE TABLE `hospital_accounts` (
 -- Dumping data for table `hospital_accounts`
 --
 
-INSERT INTO `hospital_accounts` (`hos_id`, `hospital_name`, `hospital_code`, `accreditation_num`, `cypher_key`, `software_cert`, `username_code`, `is_active`, `created_by`, `date_created`) VALUES
-(1, 'hopital one1', '300806', 'H93005836', 'DummyCipherKey300806', 'ECLAIMS-3.0-300806-DUMMY', 'ECLAIMS-3.0-300806-DUMMY', 'active', '1a7b7851-4755-41f3-b', '0000-00-00'),
+INSERT INTO `hospital_accounts` (`hos_id`, `hospital_name`, `hospital_code`, `accreditation_num`, `address`, `contact_number`, `logo`, `cypher_key`, `software_cert`, `username_code`, `is_active`, `created_by`, `date_created`) VALUES
+(1, 'hopital one1', '300806', 'H93005836', NULL, NULL, NULL, 'DummyCipherKey300806', 'ECLAIMS-3.0-300806-DUMMY', 'ECLAIMS-3.0-300806-DUMMY', 'active', '1a7b7851-4755-41f3-b', '0000-00-00'),
 (2, 'hopital two', '', '87654321', 'asasghjhjhjghjhg', '', '', 'active', '1a7b7851-4755-41f3-b', '2025-03-27');
 
 -- --------------------------------------------------------

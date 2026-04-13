@@ -18,7 +18,10 @@ const claimsForm3Routes = require("./routes/claimsForm3Routes");
 const claimsForm4Routes = require("./routes/claimsForm4Routes");
 const claimsForm5Routes = require("./routes/claimsForm5Routes");
 const fileBrowserRoutes = require("./routes/fileBrowserRoutes");
-const { ensureHospitalServiceFeaturesColumn } = require("./utils/sqlFunctions");
+const {
+  ensureHospitalServiceFeaturesColumn,
+  ensureHospitalProfileColumns,
+} = require("./utils/sqlFunctions");
 
 
 const esoaUnitRoutes = require("./routes/esoaUnitRoutes");
@@ -53,6 +56,11 @@ ensureHospitalServiceFeaturesColumn()
   .then(() => console.log("hospital_accounts.service_features is ready."))
   .catch((error) =>
     console.error("Failed to ensure hospital service_features column:", error.message),
+  );
+ensureHospitalProfileColumns()
+  .then(() => console.log("hospital_accounts profile columns are ready."))
+  .catch((error) =>
+    console.error("Failed to ensure hospital profile columns:", error.message),
   );
 
 app.listen(port, () => {
